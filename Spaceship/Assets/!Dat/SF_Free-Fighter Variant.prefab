@@ -927,6 +927,7 @@ MonoBehaviour:
       Data: 
   playerControlled: 1
   flightAssistOn: 0
+  camera: {fileID: 7105481109301782705}
 --- !u!1001 &7504714871923290567
 PrefabInstance:
   m_ObjectHideFlags: 0
