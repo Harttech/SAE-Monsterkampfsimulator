@@ -4,6 +4,7 @@ using System.Linq;
 using Rewired;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody))]
 public class SpaceShipController : SerializedMonoBehaviour
@@ -16,8 +17,10 @@ public class SpaceShipController : SerializedMonoBehaviour
     [TitleGroup("Control")]
     public bool flightAssistOn; // Auto stabilization system. Not yet implemented.
 
+    [FormerlySerializedAs("camera")]
     [TitleGroup("Camera")]
-    public Camera camera;
+    [SerializeField]
+    private Camera _camera;
 
     private Rigidbody _rigidbody;
     private Player _player;
@@ -46,7 +49,7 @@ public class SpaceShipController : SerializedMonoBehaviour
         {
             //Toggle between the fighter and corvette. Won't work if there are 3 or more ships.
             playerControlled = !playerControlled;
-            camera.enabled = playerControlled;
+            _camera.enabled = playerControlled;
         }
 
         if (!playerControlled)
