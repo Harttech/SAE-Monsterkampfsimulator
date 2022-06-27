@@ -196,6 +196,23 @@
 
             return null;
         }
+
+        /// <summary>
+        /// Recalculates tree depth
+        /// </summary>
+        private void RecalculateDepth(Node node = null)
+        {
+            node ??= Root;
+
+            if (_deepestLevel < node.Level)
+                _deepestLevel = node.Level;
+
+            if (node.RightChild != null)
+                RecalculateDepth(node.RightChild);
+
+            if (node.LeftChild != null)
+                RecalculateDepth(node.LeftChild);
+        }
     }
 
     public class Node
