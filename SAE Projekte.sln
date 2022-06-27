@@ -5,7 +5,9 @@ VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monsterkampfsimulator", "Monsterkampfsimulator\Monsterkampfsimulator.csproj", "{6C976FFA-7234-42A8-936F-2C1F69997A76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedUtilities", "SharedUtilities\SharedUtilities.csproj", "{CAA7520B-75E5-4B4B-BE13-0B6808D486FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedUtilities", "SharedUtilities\SharedUtilities.csproj", "{CAA7520B-75E5-4B4B-BE13-0B6808D486FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryTree", "BinaryTree\BinaryTree.csproj", "{E435FEFD-6BBF-4E34-A618-36A78645E09D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{CAA7520B-75E5-4B4B-BE13-0B6808D486FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAA7520B-75E5-4B4B-BE13-0B6808D486FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAA7520B-75E5-4B4B-BE13-0B6808D486FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E435FEFD-6BBF-4E34-A618-36A78645E09D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E435FEFD-6BBF-4E34-A618-36A78645E09D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E435FEFD-6BBF-4E34-A618-36A78645E09D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E435FEFD-6BBF-4E34-A618-36A78645E09D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
