@@ -63,15 +63,20 @@ while (true)
             case 1:
                 {
                     Clear();
-                    Print("Enter value to add to tree: ");
-                    var newValue = ReadLine();
-                    var key = BitConverter.ToInt16(RandomNumberGenerator.GetBytes(2));
-                    PrintEmptyLine();
-                    PrintLine($"Value \"{newValue}\" will be added to tree with key {key}");
-                    tree.Insert(key, newValue);
-                    PrintEmptyLine();
-                    Print("Press key to continue...");
-                    WaitForInput();
+                    while (true)
+                    {
+                        Print("Enter value to add to tree (or \"exit\" to stop the input): ");
+                        var newValue = ReadLine();
+
+                        if (newValue!.ToLowerInvariant() == "exit")
+                            break;
+
+                        var key = BitConverter.ToInt16(RandomNumberGenerator.GetBytes(2));
+                        PrintEmptyLine();
+                        PrintLine($"Value \"{newValue}\" will be added to tree with key {key}");
+                        tree.Insert(key, newValue);
+                        PrintEmptyLines(2);
+                    }
                     Clear();
                 }
                 break;
