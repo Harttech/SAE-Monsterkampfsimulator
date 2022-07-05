@@ -9,24 +9,47 @@ using UnityEngine.Serialization;
 [RequireComponent(typeof(Rigidbody))]
 public class SpaceShipController : SerializedMonoBehaviour
 {
+    /// <summary>
+    /// Configuration for the ship's individual thrusters.
+    /// </summary>
     [TitleGroup("Thrusters")]
-    public Dictionary<ControlActions, ThrusterConfig[]> setups;
-    
-    [TitleGroup("Control")]
-    public bool playerControlled; // If the player is currently controlling this ship
-    [TitleGroup("Control")]
-    public bool flightAssistOn; // Auto stabilization system. Not yet implemented.
+    [SerializeField]
+    private Dictionary<ControlActions, ThrusterConfig[]> setups;
 
+    /// <summary>
+    /// Whether the player is currently controlling this ship
+    /// </summary>
+    [TitleGroup("Control")]
+    [SerializeField]
+    private bool playerControlled;
+    /// <summary>
+    /// Auto stabilization system. Not yet implemented.
+    /// </summary>
+    [TitleGroup("Control")]
+    [SerializeField]
+    private bool flightAssistOn;
+
+    /// <summary>
+    /// The ship's third person camera
+    /// </summary>
     [FormerlySerializedAs("camera")]
     [TitleGroup("Camera")]
     [SerializeField]
     private Camera _camera;
 
+    /// <summary>
+    /// The GameObject's rigidbody
+    /// </summary>
     private Rigidbody _rigidbody;
+
+    /// <summary>
+    /// The input handler for the player.
+    /// </summary>
     private Player _player;
 
     [ReadOnly, TitleGroup("Debug")]
-    public Vector3 currentVelocity; // Debugging
+    [SerializeField]
+    private Vector3 currentVelocity; // Debugging
 
     void Start()
     {
@@ -169,19 +192,34 @@ public class SpaceShipController : SerializedMonoBehaviour
 [Serializable]
 public class ThrusterConfig
 {
+    /// <summary>
+    /// The physical thruster object. Location determines where the force is applied. Its globalScale attribute acts as a multiplier for the applied force.
+    /// </summary>
     [BoxGroup("Thruster Configuration")]
     [TitleGroup("Thruster Configuration/Thruster Prefab")]
-    public Thruster thruster; // The physical thruster object. Location determines where the force is applied. Its globalScale attribute acts as a multiplier for the applied force.
+    public Thruster thruster;
 
+    /// <summary>
+    /// How much force can be applied before the thruster stops boosting further. Determines how much speed output the thruster is capable of. The higher the number, the faster the ship can travel. 
+    /// </summary>
     [TitleGroup("Thruster Configuration/Strength")]
-    public float maxStrength = 5; // How much force can be applied before the thruster stops boosting further. Determines how much speed output the thruster is capable of. The higher the number, the faster the ship can travel. 
+    public float maxStrength = 5;
+    /// <summary>
+    /// How much force is currently applied.
+    /// </summary>
     [ReadOnly, TitleGroup("Thruster Configuration/Strength")]
-    public float currentStrength; // How much force is currently applied.
+    public float currentStrength;
 
+    /// <summary>
+    /// How much force per second the thruster is able to boost. The higher this number, the faster the thruster reaches its max speed output. It does NOT determine the max speed of the ship.
+    /// </summary>
     [TitleGroup("Thruster Configuration/Speed")]
-    public float accelerationPerSecond = .2f; // How much force per second the thruster is able to boost. The higher this number, the faster the thruster reaches its max speed output. It does NOT determine the max speed of the ship.
+    public float accelerationPerSecond = .2f;
+    /// <summary>
+    /// Whether this thruster is used to steer the ship into the negative of an axis.
+    /// </summary>
     [TitleGroup("Thruster Configuration/Speed")]
-    public bool negative; // Whether this thruster is used to steer the ship into the negative of an axis.
+    public bool negative;
 }
 
 /// <summary>
