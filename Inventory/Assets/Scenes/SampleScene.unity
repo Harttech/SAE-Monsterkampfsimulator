@@ -4437,6 +4437,14 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  itemSelection:
+  - {fileID: 11400000, guid: 47aaadc014776874f8b5af96da4ba3ec, type: 2}
+  - {fileID: 11400000, guid: 69412078d01ffc84abe49b610abfa91e, type: 2}
+  - {fileID: 11400000, guid: e1d53424646938743add3bf9a30c7201, type: 2}
+  - {fileID: 11400000, guid: 432dc98ef1f72e24b982deb6ce429a37, type: 2}
+  - {fileID: 11400000, guid: c18a53be3b3d82445b2011355bc6a214, type: 2}
+  - {fileID: 11400000, guid: a0390646700c6974ca456a967cacd535, type: 2}
+  - {fileID: 11400000, guid: b89d970919f032f408297426023db873, type: 2}
 --- !u!1 &1801352254
 GameObject:
   m_ObjectHideFlags: 0

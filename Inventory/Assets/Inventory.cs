@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,16 +5,16 @@ public class Inventory : MonoBehaviour
 {
     public Item[] items = new Item[30];
 
+    [SerializeField]
+    private Item[] itemSelection;
+
     void Start()
     {
-        // Find all ScripteableObjects of the type Item in the Asset database. Does not work at runtime.
-        var itemGuids = AssetDatabase.FindAssets("t:" + nameof(Item)).Select(AssetDatabase.GUIDToAssetPath).ToArray();
-
-        // Iterate through the inventory, select a random item and put it in the current position.
+        // Iterate through the itemSelection, select a random item and put it in the inventory at the current position.
         for (int i = 0; i < 30; i++)
         {
-            var r = Random.Range(0, itemGuids.Length);
-            items[i] = AssetDatabase.LoadAssetAtPath<Item>(itemGuids[r]);
+            var r = Random.Range(0, itemSelection.Length);
+            items[i] = Instantiate(itemSelection[r]);
         }
 
         // Update the UI
