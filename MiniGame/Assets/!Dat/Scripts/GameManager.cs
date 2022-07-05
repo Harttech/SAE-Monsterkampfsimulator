@@ -5,7 +5,6 @@ using System.Linq;
 using Rewired;
 using Sirenix.OdinInspector;
 using Sirenix.Utilities;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
@@ -13,8 +12,11 @@ using Random = UnityEngine.Random;
 [RequireComponent(typeof(LineRenderer))]
 public class GameManager : MonoBehaviour
 {
+    // Singleton
     private static GameManager _instance;
     public static GameManager Instance => _instance;
+
+    // Prefab setups for all the balls as well as the spawn positions for the initial triangle.
 
     [SerializeField, TitleGroup("Stick Prefab")]
     private GameObject cueStick;
@@ -479,55 +481,130 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float cueBallForceMultiplier;
 
+    /// <summary>
+    /// The balls currently on the table.
+    /// </summary>
     private readonly List<GameObject> _spawnedBalls = new();
+    /// <summary>
+    /// All full balls that are not on the table. In a queue, like a "stack of cards"...only with balls.
+    /// </summary>
     private Queue<GameObject> _fullReserves = new();
+    /// <summary>
+    /// All half balls that are not on the table. In a queue, like a "stack of cards"...only with balls.
+    /// </summary>
     private Queue<GameObject> _halfReserves = new();
 
+    /// <summary>
+    /// The currently spawned cue ball.
+    /// </summary>
     private GameObject _spawnedCueBall;
+    /// <summary>
+    /// The currently spawned 8-ball
+    /// </summary>
     private GameObject _spawnedEightBall;
+    /// <summary>
+    /// The currently spawned cue stick.
+    /// </summary>
     private GameObject _spawnedCueStick;
 
+    /// <summary>
+    /// Current ball preview. Shown when the player moves the mouse over a ball.
+    /// </summary>
     private GameObject _ballPreview;
 
-    private LineRenderer _lineRenderer;
+    /// <summary>
+    /// Used to render the movement prediction line of the cue ball.
+    /// </summary>
+    private LineRenderer _lineRenderer; // Doesn't really indicate how the cue ball will move cuz physics aren't working.
 
+    /// <summary>
+    /// Indicates which player is currently playing. 0 = player 1, 1 = player 2.
+    /// </summary>
     private byte _playerTurn;
+    /// <summary>
+    /// Whether the player is currently in the process of aiming the cue ball.
+    /// </summary>
     private bool _waitingForPlayer;
 
+    /// <summary>
+    /// The current stage of the game.
+    /// </summary>
     [TitleGroup("Game settings")]
     [ReadOnly]
     public GameStage gameStage;
 
+    /// <summary>
+    /// Which group player 1 has.
+    /// </summary>
     private BallType _player1BallType = BallType.None;
+    /// <summary>
+    /// Which group player 2 has.
+    /// </summary>
     private BallType _player2BallType = BallType.None;
 
+    /// <summary>
+    /// Whether or not groups have been assigned to players.
+    /// </summary>
     public bool AreGroupsAssigned => _player1BallType != BallType.None;
 
+    /// <summary>
+    /// How many walls were touched. Needed to determine a break foul.
+    /// </summary>
     [TitleGroup("Game settings")]
     [ReadOnly]
     public Dictionary<Guid, Ball> touchedWalls = new();
+    /// <summary>
+    /// Whether or not the 8-ball was pocketed.
+    /// </summary>
     [TitleGroup("Game settings")]
     [ReadOnly]
     public bool pocketedEightBall;
+    /// <summary>
+    /// Whether or not the cue ball was pocketed.
+    /// </summary>
     [ReadOnly]
     public bool pocketedCueBall;
 
+    /// <summary>
+    /// Max distance of the prediction line.
+    /// </summary>
     private readonly float _predictionMaxDistance = MathF.Sqrt(.5f);
 
+    /// <summary>
+    /// Whether player 1 has to skip the next turn.
+    /// </summary>
     private bool _player1Skip;
+    /// <summary>
+    /// Whether player 2 has to skip the next turn.
+    /// </summary>
     private bool _player2Skip;
 
+    /// <summary>
+    /// Needed to wait in case the cue ball's velocity wasn't updated for the next frame.
+    /// </summary>
     private float _updateTimeout;
 
+    /// <summary>
+    /// The first ball the cue ball has touched during this turn.
+    /// </summary>
     private Ball _firstHitBall;
+    /// <summary>
+    /// Whether the player has pocketed a ball of their own group.
+    /// </summary>
     private bool _pocketedBallOfOwnGroup;
 
     private Camera _mainCamera;
 
+    /// <summary>
+    /// All 6 pockets.
+    /// </summary>
     public Pocket[] allPockets;
 
     private void Start()
     {
+        /*
+         * Set up the singleton, the pockets, the renderer and the camera's perspective
+         */
         allPockets = new[]
         {
             pocketBl.GetComponent<Pocket>(),
@@ -550,9 +627,19 @@ public class GameManager : MonoBehaviour
         _mainCamera.orthographicSize = 0.8f;
     }
 
+    /// <summary>
+    /// Start a new game.
+    /// </summary>
     [Button]
     public void NewGame()
     {
+        /*
+         * Starts a new game by resetting some settings, creating new random "hands" of balls, by shuffling them, setting the rest of the balls to inactive and spawning all the standard objects, like the 8-ball, the cue ball and the cue stick.
+         */
+
+        allowCuePlacementX = false;
+        allowCuePlacementZ = true;
+
         UIManager.Instance.HideWinnerText();
         UIManager.Instance.breakFoulChoice = BreakFoulChoice.NotChosen;
         _waitingForPlayer = true;
@@ -767,9 +854,16 @@ public class GameManager : MonoBehaviour
         gameStage = GameStage.BeforeBreak;
     }
 
+    /// <summary>
+    /// Clean up the current game.
+    /// </summary>
     [Button]
     public void CleanUp()
     {
+        /*
+         * Clean Up destroys all game objects and resets visual indicators like the coloring of the player labels.
+         */
+
         UIManager.Instance.HideWinnerText();
         gameStage = GameStage.NoGame;
         SetStickActive(false);
@@ -799,12 +893,12 @@ public class GameManager : MonoBehaviour
 
         FindObjectsOfType<Ball>().ForEach(x => Destroy(x.gameObject));
 
-        pocketTl.GetComponent<Pocket>().ClearText();
-        pocketTr.GetComponent<Pocket>().ClearText();
-        pocketL.GetComponent<Pocket>().ClearText();
-        pocketR.GetComponent<Pocket>().ClearText();
-        pocketBl.GetComponent<Pocket>().ClearText();
-        pocketBr.GetComponent<Pocket>().ClearText();
+        pocketTl.GetComponent<Pocket>().SetColorAndNumber(BallColor.White, 0);
+        pocketTr.GetComponent<Pocket>().SetColorAndNumber(BallColor.White, 0);
+        pocketL.GetComponent<Pocket>().SetColorAndNumber(BallColor.White, 0);
+        pocketR.GetComponent<Pocket>().SetColorAndNumber(BallColor.White, 0);
+        pocketBl.GetComponent<Pocket>().SetColorAndNumber(BallColor.White, 0);
+        pocketBr.GetComponent<Pocket>().SetColorAndNumber(BallColor.White, 0);
 
         touchedWalls.Clear();
         _firstHitBall = null;
@@ -831,17 +925,21 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        // Don't allow control when a menu is opened.
         if (UIManager.Instance.isMenuOpen)
             return;
 
+        // Nothing to do if the game hasn't even begun.
         if (gameStage == GameStage.NoGame)
             return;
 
+        // If balls are still moving, wait until they stopped.
         if (_spawnedBalls.Any(x => x.GetComponent<Rigidbody>().velocity != Vector3.zero) || _spawnedCueBall.GetComponent<Rigidbody>().velocity != Vector3.zero)
             return;
 
-        if (_waitingForPlayer)
+        if (_waitingForPlayer) // The player is currently playing. Before the cue ball was pushed.
         {
+            // Change the current player if the actual current player has to skip.
             if (_playerTurn == 0 && _player1Skip)
             {
                 _player1Skip = false;
@@ -855,13 +953,16 @@ public class GameManager : MonoBehaviour
                 _playerTurn = 0;
             }
 
+            // Reset turn specific settings.
             _firstHitBall = null;
             _pocketedBallOfOwnGroup = false;
             pocketedEightBall = false;
 
+            // Color the player labels to indicate the current player.
             UIManager.Instance.player1Text.color = _playerTurn == 0 ? new Color(0f, .75f, 0f) : Color.white;
             UIManager.Instance.player2Text.color = _playerTurn == 1 ? new Color(0f, .75f, 0f) : Color.white;
 
+            // If the player still has balls other than the 8-ball, but none of the balls can be pocketed due to a number or color mismatch, spawn the next ball from the queue that can be pocketed. If the reserve is empty...good luck.
             var currentGroup = GetCurrentPlayerBallType();
             if (currentGroup != BallType.None)
             {
@@ -873,6 +974,8 @@ public class GameManager : MonoBehaviour
                     AddBallOfColorToGame(allPockets.First(x => x.CurrentColor != BallColor.White && x.CurrentColor != BallColor.Black && x.CurrentColor != BallColor.None).CurrentColor, 1, currentGroup == BallType.Full);
             }
 
+            // Mouse hovering. Allows player to hower over a ball to preview it in the top right corner. Helpful if the number isn't otherwise visible due to the ball's current rotation.
+            // Also needed to start dragging the cue ball if possible.
             var ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
 
             Debug.DrawRay(ray.origin, ray.direction, Color.red);
@@ -920,8 +1023,11 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-            if (_spawnedCueStick.activeSelf)
+            if (_spawnedCueStick.activeSelf) // If for whatever reason the stick isn't active, we don't need to continue this turn.
             {
+                /*
+                 * This part rotates the cue stick around the cue ball and also prevents it from being too far away from the cue ball.
+                 */
                 var mousePoint = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
                 var cueStickPos = new Vector3(mousePoint.x, 1f, mousePoint.z);
 
@@ -950,6 +1056,11 @@ public class GameManager : MonoBehaviour
                     cueStickPos = newCueStickPos;
                 }
 
+                
+                /*
+                 * This part is mainly responsible for rendering the prediction line. But since I didn't manage to set the physics right, it's mostly useless.
+                 * The ball will move in the initial direction, but the ball won't move in the reflected direction as indicated by the line.
+                 */
                 _lineRenderer.positionCount = 1;
                 _lineRenderer.SetPosition(0, cueBallPos);
 
@@ -1005,6 +1116,10 @@ public class GameManager : MonoBehaviour
 
                     if (hasHitBall)
                     {
+                        /*
+                         * A sad attempt at trying to draw a second line from the collision point to indicate the direction of both the cue ball and the ball that's hit.
+                         * But I didn't have the time to draw it right. Also, like with the cue ball itself, thanks to physics the direction isn't even correct.
+                         */
                         var ballPosition = ball.transform.position;
                         var ballDistance = (ballPosition - predictionPoint);
 
@@ -1023,7 +1138,7 @@ public class GameManager : MonoBehaviour
                 _lineRenderer.positionCount = index + 1;
                 _lineRenderer.SetPosition(index, predictionRay.origin + distance);
 
-                if (ReInput.players.GetPlayer(0).GetButton(3))
+                if (ReInput.players.GetPlayer(0).GetButton(3)) // Player pressed the left mouse button to push the cue ball.
                 {
                     _waitingForPlayer = false;
                     SetStickActive(false);
@@ -1044,6 +1159,7 @@ public class GameManager : MonoBehaviour
         }
         else if (gameStage == GameStage.AfterBreak)
         {
+            // If these conditions are met, a break fould has ocurred.
             if (touchedWalls.Count < 4 || pocketedEightBall)
             {
                 var breakChoice = UIManager.Instance.breakFoulChoice;
@@ -1069,6 +1185,11 @@ public class GameManager : MonoBehaviour
         }
         else if (gameStage == GameStage.GameLoop)
         {
+            /*
+             * This part is executed at the end of each turn. It handles winning or losing if the 8-ball was pocketed
+             * as well as handling any fouls that couldn't be handled during the turn directly, such as giving a foul when the player didn't touch any ball at all.
+             */
+
             if (pocketedEightBall)
             {
                 var currentGroup = GetCurrentPlayerBallType();
@@ -1099,10 +1220,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Removes a ball from the table. Pretty much just the Game Manager's logic for handling when a pall was pocketed.
+    /// </summary>
+    /// <param name="ball"></param>
+    /// <param name="destroy"></param>
     public void RemoveBall(Ball ball, bool destroy = false)
     {
         var go = ball.gameObject;
-        if (destroy)
+        if (destroy) // Destroy the ball completely. Gone, reduced to atoms.
         {
             _spawnedBalls.Remove(go);
 
@@ -1115,7 +1241,12 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            if (ball.Number != 8)
+            /*
+             * If the ball is pocketed, it's not destroyed. Merely deactivated. That way, the ball can easily be reused once it comes up again.
+             * They are put in the same queue as the reserve for easy recycling.
+             */
+
+            if (ball.Number != 8) // Don't cueue the 8-ball. It belongs to no one and the game simply just ends if it is cueued.
             {
                 if (ball.IsFullType && !_fullReserves.Contains(go))
                     _fullReserves.Enqueue(go);
@@ -1135,6 +1266,7 @@ public class GameManager : MonoBehaviour
                 if (ball.Number == 8)
                     return;
 
+                // Assign groups if none have been assigned. Otherwise foul the player if a ball of the opposite player's group has been pocketed.
                 if (_player1BallType == BallType.None)
                 {
                     if (_playerTurn == 0)
@@ -1174,9 +1306,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Adds a ball from the reserve back to the table. .smota ot decuder ,enoG
+    /// </summary>
+    /// <param name="amount">How many balls should be added.</param>
+    /// <param name="fromFullReserve">Whether a full ball or a half ball should be added.</param>
     [Button]
     public void AddBallToGame(byte amount, bool fromFullReserve)
     {
+        // If amount is greater than the actual amount of balls in the reserve, reduce amount.
         if (fromFullReserve)
         {
             if (_fullReserves.Count < amount)
@@ -1188,6 +1326,7 @@ public class GameManager : MonoBehaviour
                 amount = (byte)_halfReserves.Count;
         }
 
+        // Move the balls and reactivate them.
         for (int i = 0; i < amount; i++)
         {
             var ballGo = fromFullReserve ? _fullReserves.Dequeue() : _halfReserves.Dequeue();
@@ -1200,8 +1339,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Just like <see cref="AddBallToGame"/> only that it adds a ball of a specific color to the game, rather than just the next in the queue.
+    /// </summary>
+    /// <param name="color">The color of the reactivated ball.</param>
+    /// <param name="amount">How many balls should be added.</param>
+    /// <param name="fromFullReserve">Whether a full ball or a half ball should be added.</param>
     public void AddBallOfColorToGame(BallColor color, byte amount, bool fromFullReserve)
     {
+        // If amount is greater than the actual amount of balls in the reserve, reduce amount.
         if (fromFullReserve)
         {
             if (_fullReserves.Count < amount)
@@ -1213,6 +1359,7 @@ public class GameManager : MonoBehaviour
                 amount = (byte)_halfReserves.Count;
         }
 
+        // Move through the queue until a ball of the specified color was found. The other balls will be added back to the end of the queue.
         for (int i = 0; i < amount; i++)
         {
             GameObject ballGo;
@@ -1243,6 +1390,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Enable or disable moving the cue stick.
+    /// </summary>
+    /// <param name="active">Whether the cue stick should be disabled or not.</param>
     public void SetStickActive(bool active)
     {
         if (_spawnedCueStick != null)
@@ -1250,8 +1401,13 @@ public class GameManager : MonoBehaviour
         _lineRenderer.enabled = active;
     }
 
+    /// <summary>
+    /// Give a foul to a player.
+    /// </summary>
+    /// <param name="foulNext">If true, the next player will receive the foul. Otherwise the current player.</param>
     public void FoulPlayer(bool foulNext = false)
     {
+        // Shake camera for visual indicator that a foul ocurred.
         ShakeCamera();
 
         if ((_playerTurn == 0 && !foulNext) || (_playerTurn == 1 && foulNext))
@@ -1272,16 +1428,30 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Set all balls to kinematic.
+    /// </summary>
+    /// <remarks>Used to prevent balls from moving when hit by the cue ball during dragging.</remarks>
     public void FreezeBalls()
     {
         _spawnedBalls.ForEach(x => SetRigidBodyKinematic(x, true));
         SetRigidBodyKinematic(_spawnedCueBall, true);
     }
+
+    /// <summary>
+    /// Set all balls to not kinematic.
+    /// </summary>
     public void UnfreezeBalls()
     {
         _spawnedBalls.ForEach(x => SetRigidBodyKinematic(x, false));
         SetRigidBodyKinematic(_spawnedCueBall, false);
     }
+
+    /// <summary>
+    /// Sets the kinematic state of a gameobject.
+    /// </summary>
+    /// <param name="go">The Game Object to be updated.</param>
+    /// <param name="frozen">Whether the Game Object should be kinematic or not.</param>
     private void SetRigidBodyKinematic(GameObject go, bool frozen)
     {
         var rb = go.GetComponent<Rigidbody>();
@@ -1289,18 +1459,29 @@ public class GameManager : MonoBehaviour
         rb.velocity = Vector3.zero;
     }
 
+    /// <summary>
+    /// Start the camera shaking coroutine.
+    /// </summary>
     public void ShakeCamera() => StartCoroutine(ShakeCameraCoroutine());
+    /// <summary>
+    /// Shake the camera in a coroutine.
+    /// </summary>
+    /// <remarks>Wiggle wiggle.</remarks>
     private IEnumerator ShakeCameraCoroutine()
     {
         for (int i = 0; i < 10; i++)
         {
-            Camera.main.transform.position = new Vector3(Random.Range(-.009f, 0.001f), 2.2f, Random.Range(-.009f, 0.001f));
+            _mainCamera.transform.position = new Vector3(Random.Range(-.009f, 0.001f), 2.2f, Random.Range(-.009f, 0.001f));
             yield return new WaitForSeconds(0.01f);
         }
 
-        Camera.main.transform.position = new Vector3(0, 2.2f, 0);
+        _mainCamera.transform.position = new Vector3(0, 2.2f, 0);
     }
 
+    /// <summary>
+    /// Handle what happens when the cue ball hits another ball.
+    /// </summary>
+    /// <param name="otherBall">The ball that was hit.</param>
     public void HandleCueBallHit(Ball otherBall)
     {
         if (_firstHitBall != null)
@@ -1308,9 +1489,10 @@ public class GameManager : MonoBehaviour
 
         _firstHitBall = otherBall;
 
-        if (otherBall.BallColor == BallColor.Black)
+        if (otherBall.BallColor == BallColor.Black) // Hitting the 8-ball is okay. No clue if that's the case in real Pool but here it is.
             return;
 
+        // If the first contact is with a ball of the opposite player's group, it's a foul.
         if (otherBall.IsFullType)
         {
             if ((_playerTurn == 0 && _player1BallType == BallType.Half) || (_playerTurn == 1 && _player2BallType == BallType.Half))
@@ -1323,8 +1505,14 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Return the ball type/group of the current player.
+    /// </summary>
     public BallType GetCurrentPlayerBallType() => _playerTurn == 0 ? _player1BallType : _player2BallType;
 
+    /// <summary>
+    /// Switch the groups of the players.
+    /// </summary>
     public void SwitchGroups()
     {
         (_player1BallType, _player2BallType) = (_player2BallType, _player1BallType);
