@@ -570,6 +570,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private readonly float _predictionMaxDistance = MathF.Sqrt(.5f);
 
+    private readonly float _minMovementThreshold = (float)Math.Pow(0.001, 2);
+
     /// <summary>
     /// Whether player 1 has to skip the next turn.
     /// </summary>
@@ -934,7 +936,7 @@ public class GameManager : MonoBehaviour
             return;
 
         // If balls are still moving, wait until they stopped.
-        if (_spawnedBalls.Any(x => x.GetComponent<Rigidbody>().velocity != Vector3.zero) || _spawnedCueBall.GetComponent<Rigidbody>().velocity != Vector3.zero)
+        if (_spawnedBalls.Any(x => x.GetComponent<Rigidbody>().velocity.sqrMagnitude >= _minMovementThreshold) || _spawnedCueBall.GetComponent<Rigidbody>().velocity.sqrMagnitude >= _minMovementThreshold)
             return;
 
         if (_waitingForPlayer) // The player is currently playing. Before the cue ball was pushed.
