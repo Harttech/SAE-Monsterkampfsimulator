@@ -164,11 +164,13 @@ while (true)
     if (defender.Attack(attacker.AttackStrength, out var damage))
     {
         Print($"The {defender.Race} received {Math.Round(damage, 2)} damage and ", defenderColor);
-        PrintLine("perishes!", ConsoleColor.Red);
+        PrintLine("perished!", ConsoleColor.Red);
 
         PrintEmptyLine();
 
-        Print($"The {attacker.Race} is the ");
+        Print("The ");
+        Print($"{attacker.Race} ", attackerColor);
+        Print("is the ");
         Print("winner! ", ConsoleColor.Green);
         Print("The fight lasted for ");
         Print($"{turnCount} ", ConsoleColor.Yellow);

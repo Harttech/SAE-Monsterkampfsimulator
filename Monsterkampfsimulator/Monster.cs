@@ -6,11 +6,11 @@ namespace Monsterkampfsimulator
     /// <summary>
     /// A class representing a monster compatant
     /// </summary>
-    public class Monster
+    public abstract class Monster
     {
         private float _health;
 
-        private Monster(float health, float attackStrength, float defense, float speed, Race race)
+        protected Monster(float health, float attackStrength, float defense, float speed, string race)
         {
             _health = health;
             AttackStrength = attackStrength;
@@ -36,10 +36,9 @@ namespace Monsterkampfsimulator
         /// </summary>
         public float Speed { get; }
         /// <summary>
-        /// The race/species of the monster.
+        /// The monster's race.
         /// </summary>
-        public Race Race { get; }
-
+        public string Race { get; }
 
         /// <summary>
         /// Attacks this monster and returns, whether the monster has died.
@@ -75,27 +74,7 @@ namespace Monsterkampfsimulator
         /// Get a color representing the monster's species.
         /// </summary>
         /// <returns>A color representing the monster's species.</returns>
-        public ConsoleColor GetMonsterColor()
-        {
-            ConsoleColor color;
-            switch (Race)
-            {
-                case Race.Orc:
-                    color = ConsoleColor.DarkGreen;
-                    break;
-                case Race.Troll:
-                    color = ConsoleColor.Blue;
-                    break;
-                case Race.Goblin:
-                    color = ConsoleColor.DarkYellow;
-                    break;
-                default:
-                    color = ConsoleColor.Gray;
-                    break;
-            }
-
-            return color;
-        }
+        public abstract ConsoleColor GetMonsterColor();
 
         /// <summary>
         /// Create a new monster by prompting the user for input.
@@ -103,13 +82,26 @@ namespace Monsterkampfsimulator
         /// <returns>A new monster.</returns>
         public static Monster CreateMonster()
         {
-            var race = (Race)(ConsoleHelper.ReadInt32("Enter a value for a race (1 = Orc, 2 = Troll, 3 = Goblin): ", null, 1, 3, errorForegroundColor: ConsoleColor.DarkRed)! - 1);
+            var raceInput = (ConsoleHelper.ReadInt32("Enter a value for a race (1 = Orc, 2 = Troll, 3 = Goblin): ", null, 1, 3, errorForegroundColor: ConsoleColor.DarkRed)!);
             var health = ConsoleHelper.ReadFloat("Enter a value for the monster's health: ", null, 0, errorForegroundColor: ConsoleColor.DarkRed);
             var attack = ConsoleHelper.ReadFloat("Enter a value for the monster's attack strength: ", null, 0, errorForegroundColor: ConsoleColor.DarkRed);
             var defense = ConsoleHelper.ReadFloat("Enter a value for the monster's defense: ", null, 0, errorForegroundColor: ConsoleColor.DarkRed);
             var speed = ConsoleHelper.ReadFloat("Enter a value for the monster's speed: ", null, 0, errorForegroundColor: ConsoleColor.DarkRed);
 
-            return new Monster(health!.Value, attack!.Value, defense!.Value, speed!.Value, race);
+            switch (raceInput)
+            {
+                case 1:
+                    return new Orc(health!.Value, attack!.Value, defense!.Value, speed!.Value);
+
+                case 2:
+                    return new Troll(health!.Value, attack!.Value, defense!.Value, speed!.Value);
+
+                case 3:
+                    return new Goblin(health!.Value, attack!.Value, defense!.Value, speed!.Value);
+
+                default:
+                    throw new IndexOutOfRangeException("Only values 1, 2 and 3 are allowed for the monster's race.");
+            }
         }
 
         public override string ToString()
