@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Monsterkampfsimulator", "Mo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedUtilities", "SharedUtilities\SharedUtilities.csproj", "{CAA7520B-75E5-4B4B-BE13-0B6808D486FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryTree", "BinaryTree\BinaryTree.csproj", "{E435FEFD-6BBF-4E34-A618-36A78645E09D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryTree", "BinaryTree\BinaryTree.csproj", "{291F10CC-F8BB-4058-B190-CF4B7EEA3E47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{CAA7520B-75E5-4B4B-BE13-0B6808D486FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAA7520B-75E5-4B4B-BE13-0B6808D486FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAA7520B-75E5-4B4B-BE13-0B6808D486FF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E435FEFD-6BBF-4E34-A618-36A78645E09D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E435FEFD-6BBF-4E34-A618-36A78645E09D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E435FEFD-6BBF-4E34-A618-36A78645E09D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E435FEFD-6BBF-4E34-A618-36A78645E09D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{291F10CC-F8BB-4058-B190-CF4B7EEA3E47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{291F10CC-F8BB-4058-B190-CF4B7EEA3E47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{291F10CC-F8BB-4058-B190-CF4B7EEA3E47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{291F10CC-F8BB-4058-B190-CF4B7EEA3E47}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
